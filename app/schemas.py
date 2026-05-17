@@ -6,13 +6,9 @@ from pydantic import BaseModel, Field, field_validator
 MAX_PLACES_PER_PROJECT = 10
 
 
-class PlaceImportBase(BaseModel):
+class PlaceCreate(BaseModel):
     external_id: int = Field(..., gt=0)
     notes: str | None = None
-
-
-class PlaceCreate(PlaceImportBase):
-    pass
 
 
 class PlaceUpdate(BaseModel):
@@ -27,10 +23,11 @@ class PlaceUpdate(BaseModel):
         return value.strip()
 
 
-class ProjectBase(BaseModel):
+class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
     start_date: date | None = None
+    places: list[PlaceCreate] = Field(..., min_length=1, max_length=MAX_PLACES_PER_PROJECT)
 
     @field_validator("name")
     @classmethod
@@ -47,10 +44,6 @@ class ProjectBase(BaseModel):
             return value
         stripped = value.strip()
         return stripped or None
-
-
-class ProjectCreate(ProjectBase):
-    places: list[PlaceCreate] = Field(..., min_length=1, max_length=MAX_PLACES_PER_PROJECT)
 
     @field_validator("places")
     @classmethod
